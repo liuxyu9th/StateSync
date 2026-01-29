@@ -241,9 +241,15 @@ public class ClientHandler
                 }
 
                 string json = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                json = json.Split("|")[0];
-                var op = JsonConvert.DeserializeObject<OperationRequest>(json);
-                ProcessOperation(op);
+                try
+                {
+                    var op = JsonConvert.DeserializeObject<OperationRequest>(json.Split("|")[0]);
+                    ProcessOperation(op);
+                }
+                catch (Exception e)
+                {
+                    continue;
+                }
                 Thread.Sleep(20);
             }
         }

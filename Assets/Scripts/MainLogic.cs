@@ -30,7 +30,7 @@ public class MainLogic : MonoBehaviour
             Player p;
             if(!players.TryGetValue(item.Key, out p))
                 continue;
-            var deltaMove = item.Value.moveForward.ToVector3() * deltaTime;
+            var deltaMove = item.Value.moveForward.ToVector3() * deltaTime * 0.001f;
             p.SyncState(p.transform.position + deltaMove);
         }
     }
