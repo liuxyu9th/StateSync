@@ -128,8 +128,8 @@ public class ClientHandler
         _server = server;
         ClientId = clientId;
         _stream = client.GetStream();
-        _stream.WriteTimeout = 500;
-        _stream.ReadTimeout = 500;
+        _stream.WriteTimeout = 5000;
+        _stream.ReadTimeout = 5000;
         IsConnected = true;
         mainLogic = logic;
     }
@@ -166,7 +166,7 @@ public class ClientHandler
             _stream?.Close();
             _client?.Close();
             _server.RemoveClient(this);
-            Console.WriteLine($"Client {ClientId} disconnected");
+            Debug.LogError($"Client {ClientId} disconnected");
         }
     }
     
@@ -192,7 +192,6 @@ public class ClientHandler
             byte[] buffer = new byte[4096];
             while (IsConnected && _client.Connected && _server.Running)
             {
-                _stream.ReadTimeout = 500;
                 int bytesRead;
                 try
                 {
@@ -201,7 +200,7 @@ public class ClientHandler
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e);
+                    Debug.LogError(e);
                     continue;
                 }
 
@@ -213,7 +212,7 @@ public class ClientHandler
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            Debug.LogError(e);
             throw;
         }
     }
