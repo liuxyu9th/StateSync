@@ -64,6 +64,19 @@ public class MainLogic : MonoBehaviour
         }
     }
 
+    private void OnDestroy()
+    {
+        if (server != null)
+        {
+            server.Running = false;
+        }
+
+        if (client != null)
+        {
+            client.Running = false;
+        }
+    }
+
     public void SyncState(GameState state)
     {
         if(state == null)

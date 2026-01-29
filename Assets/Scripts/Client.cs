@@ -33,6 +33,8 @@ public class Client
     private readonly object _stateLock = new object();
     private readonly object _opertationLock = new object();
 
+    public bool Running = false;
+
     public Client(MainLogic logic)
     {
         mainLogic = logic;
@@ -47,6 +49,7 @@ public class Client
             _isConnected = true;
             Debug.Log($"Connected to server {serverIp}:{port}");
 
+            Running = true;
             Task.Run(ReceiveMessages);
             Task.Run(SendOperation);
         }
@@ -78,12 +81,13 @@ public class Client
             _isConnected = false;
             _stream?.Close();
             _client?.Close();
+            Running = false;
             Console.WriteLine("Disconnected from server");
         }
     }
     private void SendOperation()
     {
-        while (_isConnected)
+        while (_isConnected && Running)
         {
             try
             {
@@ -122,7 +126,7 @@ public class Client
     private void ReceiveMessages()
     {
         byte[] buffer = new byte[4096];
-        while (_isConnected && _client.Connected)
+        while (_isConnected && _client.Connected && Running)
         {
             try
             {
