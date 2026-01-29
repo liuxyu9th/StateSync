@@ -99,7 +99,7 @@ public class MainLogic : MonoBehaviour
             {
                 MyPlayer = p;
             }
-            p.transform.position = item.Value.ToVector3();
+            p.SyncState(item.Value);
         }
     }
     private void Start()

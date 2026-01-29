@@ -19,7 +19,10 @@ public class Player : MonoBehaviour
         mainLogic = logic;
     }
 
-    public void SyncState(Vector3 postion)
+    public void SyncState(Vector3Data postion)
+    {
+        syncPos = postion.ToVector3();
+    } public void SyncState(Vector3 postion)
     {
         syncPos = postion;
     }
