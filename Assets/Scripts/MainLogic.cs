@@ -59,7 +59,7 @@ public class MainLogic : MonoBehaviour
         }
         else
         {
-            client = new Client();
+            client = new Client(this);
             client.Connect("127.0.0.1",9999);
         }
     }

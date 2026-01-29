@@ -32,7 +32,11 @@ public class Client
     
     private readonly object _stateLock = new object();
     private readonly object _opertationLock = new object();
-    
+
+    public Client(MainLogic logic)
+    {
+        mainLogic = logic;
+    }
     public void Connect(string serverIp, int port)
     {
         try
