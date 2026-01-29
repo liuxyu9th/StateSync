@@ -13,8 +13,9 @@ public class Player : MonoBehaviour
 
     private Vector3 syncPos;
     
-    public void Init(MainLogic logic)
+    public void Init(int id,MainLogic logic)
     {
+        this.id = id;
         mainLogic = logic;
     }
 

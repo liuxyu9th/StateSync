@@ -40,7 +40,7 @@ public class MainLogic : MonoBehaviour
         GameObject go = Instantiate(PlayerPrefab);
         var player = go.GetComponent<Player>();
         players.Add(id, player);
-        player.Init(this);
+        player.Init(id,this);
         return player;
     }
     public void RemovePlayer(int id)
