@@ -150,8 +150,8 @@ public class ClientHandler
         _server = server;
         ClientId = clientId;
         _stream = client.GetStream();
-        _stream.WriteTimeout = 5000;
-        _stream.ReadTimeout = 5000;
+        /*_stream.WriteTimeout = 5000;
+        _stream.ReadTimeout = 5000;*/
         IsConnected = true;
         mainLogic = logic;
     }

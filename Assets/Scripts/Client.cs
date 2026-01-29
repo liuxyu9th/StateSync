@@ -61,8 +61,8 @@ public class Client
             _client = new TcpClient();
             _client.Connect(serverIp, port);
             _stream = _client.GetStream();
-            _stream.WriteTimeout = 5000;
-            _stream.ReadTimeout = 5000;
+            /*_stream.WriteTimeout = 5000;
+            _stream.ReadTimeout = 5000;*/
             _isConnected = true;
             Debug.Log($"Connected to server {serverIp}:{port}");
 
