@@ -93,11 +93,13 @@ public class Server
     {
         while (Running)
         {
-            int t1 = DateTime.Now.Millisecond;
+            long t1 = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             Loom.QueueOnMainThread(UpdateGameState,null);
-            while (!stateUpdated || DateTime.Now.Millisecond - t1 < BroadCastInterval)
+            int passTime = (int)(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - t1);
+            while (!stateUpdated || passTime < BroadCastInterval)
             {
-                Thread.Sleep(Math.Clamp(BroadCastInterval - (DateTime.Now.Millisecond - t1),1,BroadCastInterval));
+                Thread.Sleep(Math.Clamp(BroadCastInterval - passTime,10,BroadCastInterval));
+                passTime = (int)(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - t1);
             }
 
             string json;
@@ -138,7 +140,6 @@ public class ClientHandler
 {
     public Thread handlerThread;
     private TcpClient _client;
-    private NetworkStream _stream;
     private Server _server;
     public int ClientId { get; }
     public bool IsConnected { get; private set; }
@@ -149,7 +150,6 @@ public class ClientHandler
         _client = client;
         _server = server;
         ClientId = clientId;
-        _stream = client.GetStream();
         /*_stream.WriteTimeout = 5000;
         _stream.ReadTimeout = 5000;*/
         IsConnected = true;
@@ -166,8 +166,7 @@ public class ClientHandler
         try
         {
             byte[] buffer = Encoding.UTF8.GetBytes(data);
-            _stream.Write(buffer, 0, buffer.Length);
-            _stream.Flush();
+            _client.Client.Send(buffer);
         }
         catch
         {
@@ -178,8 +177,7 @@ public class ClientHandler
     {
         try
         {
-            _stream.Write(buffer, 0, buffer.Length);
-            _stream.Flush();
+            _client.Client.Send(buffer);
         }
         catch
         {
@@ -191,7 +189,6 @@ public class ClientHandler
         if (IsConnected)
         {
             IsConnected = false;
-            _stream?.Close();
             _client?.Close();
             _server.RemoveClient(this);
             Debug.LogError($"Client {ClientId} disconnected");
@@ -203,7 +200,6 @@ public class ClientHandler
         try
         {
             _client?.Close();
-            _stream?.Close();
             handlerThread?.Abort();
         }
         catch (Exception e)
@@ -235,7 +231,7 @@ public class ClientHandler
                 int bytesRead;
                 try
                 {
-                    bytesRead = _stream.Read(buffer, 0, buffer.Length);
+                    bytesRead = _client.Client.Receive(buffer);
                     if (bytesRead == 0) continue;
                 }
                 catch (Exception e)

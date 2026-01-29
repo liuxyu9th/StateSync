@@ -22,7 +22,6 @@ public class Client
 {
     public int id;
     private TcpClient _client;
-    private NetworkStream _stream;
     private bool _isConnected;
     public MainLogic mainLogic;
     private GameState curState;
@@ -60,7 +59,6 @@ public class Client
         {
             _client = new TcpClient();
             _client.Connect(serverIp, port);
-            _stream = _client.GetStream();
             /*_stream.WriteTimeout = 5000;
             _stream.ReadTimeout = 5000;*/
             _isConnected = true;
@@ -98,7 +96,6 @@ public class Client
         if (_isConnected)
         {
             _isConnected = false;
-            _stream?.Close();
             _client?.Close();
             Running = false;
             Console.WriteLine("Disconnected from server");
@@ -126,8 +123,7 @@ public class Client
                 var data = Encoding.UTF8.GetBytes(json);
                 try
                 {
-                    _stream.Write(data, 0, data.Length);
-                    _stream.Flush();
+                    _client.Client.Send(data);
                 }
                 catch (Exception e)
                 {
@@ -159,7 +155,7 @@ public class Client
                 int bytesRead;
                 try
                 {
-                    bytesRead = _stream.Read(buffer, 0, buffer.Length);
+                    bytesRead = _client.Client.Receive(buffer);
                     if (bytesRead == 0) continue;
                 }
                 catch (Exception e)
