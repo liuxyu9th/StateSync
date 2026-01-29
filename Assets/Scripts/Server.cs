@@ -80,7 +80,7 @@ public class Server
             int deltaTime = BroadCastInterval;
             if (lastUpdate != 0)
             {
-                deltaTime = (int)(lastUpdate - DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+                deltaTime = (int)(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - lastUpdate);
             }
             mainLogic.UpdateGameState(deltaTime);
             mainLogic.GetGameState(State);
