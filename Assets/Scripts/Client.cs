@@ -5,7 +5,6 @@ using System.IO;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -33,11 +32,27 @@ public class Client
     private readonly object _stateLock = new object();
     private readonly object _opertationLock = new object();
 
+    private Thread recThread;
+    private Thread sendThread;
     public bool Running = false;
 
     public Client(MainLogic logic)
     {
         mainLogic = logic;
+    }
+
+    public void Clear()
+    {
+        Running = false;
+        try
+        {
+            recThread?.Abort();
+            sendThread?.Abort();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
     }
     public void Connect(string serverIp, int port)
     {
@@ -52,8 +67,10 @@ public class Client
             Debug.Log($"Connected to server {serverIp}:{port}");
 
             Running = true;
-            Task.Run(ReceiveMessages);
-            Task.Run(SendOperation);
+            recThread = new Thread(ReceiveMessages);
+            sendThread = new Thread(SendOperation);
+            recThread.Start();
+            sendThread.Start();
         }
         catch (Exception ex)
         {

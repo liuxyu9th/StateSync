@@ -68,12 +68,12 @@ public class MainLogic : MonoBehaviour
     {
         if (server != null)
         {
-            server.Running = false;
+            server.Clear();
         }
 
         if (client != null)
         {
-            client.Running = false;
+            client.Clear();
         }
     }
 

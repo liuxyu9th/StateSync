@@ -335,7 +335,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PlayerPrefab: {fileID: 4755064241390229039, guid: 628f11b292689bf4b8a50ba2918b5d53, type: 3}
-  IsServer: 1
+  IsServer: 0
   MyPlayerId: 0
   MyPlayer: {fileID: 0}
 --- !u!1660057539 &9223372036854775807

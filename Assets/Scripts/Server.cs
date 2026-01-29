@@ -6,7 +6,6 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using UnityEngine;
@@ -23,17 +22,39 @@ public class Server
     private MainLogic mainLogic;
     private bool stateUpdated = false;
     public ConcurrentDictionary<int ,OperationRequest> operationRequests = new ConcurrentDictionary<int ,OperationRequest>();
+    Thread listenThread;
+    Thread broadcastThread;
     public Server(int port,MainLogic mainLogic)
     {
         tcpListener = new TcpListener(IPAddress.Any, port);
         this.mainLogic = mainLogic;
     }
 
+    public void Clear()
+    {
+        try
+        {
+            listenThread?.Abort();
+            broadcastThread?.Abort();
+            foreach (var item in clients)
+            {
+                item.Clear();
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
     public void StartServer()
     {
         Running = true;
-        Task.Run(Listen);
-        Task.Run(SendToAll);
+        listenThread = new Thread(Listen);
+        broadcastThread = new Thread(SendToAll);
+        listenThread.Start();
+        broadcastThread.Start();
     }
 
     private void Listen()
@@ -46,7 +67,7 @@ public class Server
             {
                 var handler = new ClientHandler(client, this, clients.Count + 1, mainLogic);
                 clients.Add(handler);
-                Task.Run(() => handler.HandleClient());
+                handler.Start();
             }
         }
     }
@@ -115,6 +136,7 @@ public class Server
 
 public class ClientHandler
 {
+    public Thread handlerThread;
     private TcpClient _client;
     private NetworkStream _stream;
     private Server _server;
@@ -132,6 +154,12 @@ public class ClientHandler
         _stream.ReadTimeout = 5000;
         IsConnected = true;
         mainLogic = logic;
+    }
+
+    public void Start()
+    {
+        handlerThread = new Thread(HandleClient);
+        handlerThread.Start();
     }
     public void SendData(string data)
     {
@@ -169,7 +197,19 @@ public class ClientHandler
             Debug.LogError($"Client {ClientId} disconnected");
         }
     }
-    
+
+    public void Clear()
+    {
+        try
+        {
+            _client?.Close();
+            _stream?.Close();
+            handlerThread?.Abort();
+        }
+        catch (Exception e)
+        {
+        }
+    }
     private void ProcessOperation(OperationRequest op)
     {
         if(op.ClientId == 0)
