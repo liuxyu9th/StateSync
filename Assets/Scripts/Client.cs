@@ -46,6 +46,8 @@ public class Client
             _client = new TcpClient();
             _client.Connect(serverIp, port);
             _stream = _client.GetStream();
+            _stream.WriteTimeout = 500;
+            _stream.ReadTimeout = 500;
             _isConnected = true;
             Debug.Log($"Connected to server {serverIp}:{port}");
 
@@ -105,9 +107,16 @@ public class Client
                     json = JsonConvert.SerializeObject(curOperations);
                 }
                 var data = Encoding.UTF8.GetBytes(json);
-
-                _stream.Write(data, 0, data.Length);
-                _stream.Flush();
+                try
+                {
+                    _stream.Write(data, 0, data.Length);
+                    _stream.Flush();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    continue;
+                }
                 
                 lock (_opertationLock)
                 {
@@ -130,8 +139,17 @@ public class Client
         {
             try
             {
-                int bytesRead = _stream.Read(buffer, 0, buffer.Length);
-                if (bytesRead == 0) continue;
+                int bytesRead;
+                try
+                {
+                    bytesRead = _stream.Read(buffer, 0, buffer.Length);
+                    if (bytesRead == 0) continue;
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    continue;
+                }
 
                 string data = Encoding.UTF8.GetString(buffer, 0, bytesRead);
                 lock (_stateLock)

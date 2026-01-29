@@ -128,6 +128,8 @@ public class ClientHandler
         _server = server;
         ClientId = clientId;
         _stream = client.GetStream();
+        _stream.WriteTimeout = 500;
+        _stream.ReadTimeout = 500;
         IsConnected = true;
         mainLogic = logic;
     }
@@ -188,10 +190,20 @@ public class ClientHandler
             Debug.Log($"Client {ClientId} connected from {_client.Client.RemoteEndPoint}");
             
             byte[] buffer = new byte[4096];
-            while (IsConnected && _client.Connected)
+            while (IsConnected && _client.Connected && _server.Running)
             {
-                int bytesRead = _stream.Read(buffer, 0, buffer.Length);
-                if (bytesRead == 0) continue;
+                _stream.ReadTimeout = 500;
+                int bytesRead;
+                try
+                {
+                    bytesRead = _stream.Read(buffer, 0, buffer.Length);
+                    if (bytesRead == 0) continue;
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    continue;
+                }
 
                 string json = Encoding.UTF8.GetString(buffer, 0, bytesRead);
                 var op = JsonConvert.DeserializeObject<OperationRequest>(json);
