@@ -115,7 +115,7 @@ public class Server
                     throw;
                 }
             }
-            byte[] buffer = Encoding.UTF8.GetBytes(json);
+            byte[] buffer = Encoding.UTF8.GetBytes(json + "|");
             lock (_clientsLock)
             {
                 foreach (var client in clients)
@@ -165,7 +165,7 @@ public class ClientHandler
     {
         try
         {
-            byte[] buffer = Encoding.UTF8.GetBytes(data);
+            byte[] buffer = Encoding.UTF8.GetBytes(data + "|");
             _client.Client.Send(buffer);
         }
         catch
@@ -222,7 +222,7 @@ public class ClientHandler
             },null);
             GameState state = new GameState();
             state.myId = ClientId;
-            SendData(JsonConvert.SerializeObject(state));
+            SendData(JsonConvert.SerializeObject(state) + "|");
             Debug.Log($"Client {ClientId} connected from {_client.Client.RemoteEndPoint}");
             
             byte[] buffer = new byte[4096];
@@ -241,6 +241,7 @@ public class ClientHandler
                 }
 
                 string json = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                json = json.Split("|")[0];
                 var op = JsonConvert.DeserializeObject<OperationRequest>(json);
                 ProcessOperation(op);
                 Thread.Sleep(20);

@@ -118,7 +118,7 @@ public class Client
                     {
                         curOperations.moveForward = mainLogic.MyPlayer.moveForward.ConvertToGameStateData();
                     }
-                    json = JsonConvert.SerializeObject(curOperations);
+                    json = JsonConvert.SerializeObject(curOperations) + "|";
                 }
                 var data = Encoding.UTF8.GetBytes(json);
                 try
@@ -165,6 +165,7 @@ public class Client
                 }
 
                 string data = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                data = data.Split("|")[0];
                 lock (_stateLock)
                 {
                      curState = JsonConvert.DeserializeObject<GameState>(data);
